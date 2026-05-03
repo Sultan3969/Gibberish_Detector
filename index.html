@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Gibberish Text Optimization System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <nav class="navbar">
+        <div class="menu-container" style="display: flex; align-items: center; gap: 10px;">
+            <button id="menuBtn" class="icon-btn">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <a href="{{ url_for('get_started') }}" class="icon-btn" title="Go to Home" style="color: var(--text-main); text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-house"></i>
+            </a>
+            <div id="dropdownMenu" class="dropdown-menu hidden">
+                <a href="#" class="menu-item" id="clearTextMenu"><i class="fa-solid fa-trash-can"></i> Clear Input</a>
+                <div class="menu-divider"></div>
+                <a href="#" class="menu-item" id="exportMenu"><i class="fa-solid fa-file-export"></i> Export Results</a>
+                <a href="#" class="menu-item" id="copyResultMenu"><i class="fa-solid fa-copy"></i> Copy Optimized Text</a>
+                <a href="#" class="menu-item" id="printMenu"><i class="fa-solid fa-print"></i> Print Results</a>
+                <a href="#" class="menu-item" id="settingsMenu"><i class="fa-solid fa-gear"></i> Advanced Settings</a>
+                <div class="menu-divider"></div>
+                <a href="/logout" class="menu-item" style="color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+        </div>
+        <div class="nav-title">
+            <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Optimizer Pro</h2>
+        </div>
+        <div class="profile-container" style="display: flex; align-items: center; gap: 1rem;">
+            <button id="viewDbBtn" class="icon-btn" title="View Database" style="color: var(--primary); background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3);">
+                <i class="fa-solid fa-database"></i>
+            </button>
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; box-shadow: 0 4px 10px rgba(0, 242, 254, 0.4); cursor: pointer;" title="User Profile">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="background-blobs">
+        <div class="blob shape-1"></div>
+        <div class="blob shape-2"></div>
+    </div>
+
+    <main class="dashboard-layout">
+        <!-- Left Column -->
+        <div class="dashboard-col left-col">
+            <section class="glass-panel input-section">
+                <textarea id="textInput" placeholder="Type or paste your text here... Or click the microphone to speak!"></textarea>
+                
+                <div class="action-buttons">
+                    <select id="sourceLanguage" class="language-dropdown" style="margin-right: 0.5rem; max-width: 130px;" title="Input Language">
+                        <option value="en-US">✍️/🗣️ English</option>
+                        <option value="hi-IN">✍️/🗣️ Hindi</option>
+                        <option value="te-IN">✍️/🗣️ Telugu</option>
+                    </select>
+                    <button id="voiceBtn" class="icon-btn voice-btn" title="Speak Input">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <input type="file" id="fileUpload" accept=".txt,.pdf" style="display: none;">
+                    <button id="uploadBtn" class="icon-btn" title="Upload Document (English Only)">
+                        <i class="fa-solid fa-file-arrow-up"></i>
+                    </button>
+                    <select id="targetLanguage" class="language-dropdown">
+                        <option value="en">English (Optimize Only)</option>
+                        <option value="es">🇺🇸 ➔ 🇪🇸 Translate to Spanish</option>
+                        <option value="fr">🇺🇸 ➔ 🇫🇷 Translate to French</option>
+                        <option value="de">🇺🇸 ➔ 🇩🇪 Translate to German</option>
+                        <option value="hi">🇺🇸 ➔ 🇮🇳 Translate to Hindi</option>
+                        <option value="te">🇺🇸 ➔ 🇮🇳 Translate to Telugu</option>
+                        <option value="ml">🇺🇸 ➔ 🇮🇳 Translate to Malayalam</option>
+                        <option value="ta">🇺🇸 ➔ 🇮🇳 Translate to Tamil</option>
+                        <option value="zh-CN">🇺🇸 ➔ 🇨🇳 Translate to Chinese</option>
+                    </select>
+                    <button id="processBtn" class="btn primary-btn">Process Text</button>
+                </div>
+                <div id="statusMessage" class="status-message"></div>
+            </section>
+
+            <section class="glass-panel train-section" style="margin-top: 2rem;">
+                <div class="result-header">
+                    <h3><i class="fa-solid fa-graduation-cap"></i> Train the MLA Model</h3>
+                </div>
+                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Human-in-the-loop learning: Force the AI to learn a specific correction to overwrite past mistakes.</p>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="text" id="badWordInput" class="form-input" placeholder="Mistake Word">
+                    <i class="fa-solid fa-arrow-right" style="color: var(--primary); font-size: 1.2rem;"></i>
+                    <input type="text" id="goodWordInput" class="form-input" placeholder="Corrected Word">
+                    <button id="trainBtn" class="btn primary-btn" style="white-space: nowrap; padding: 0.8rem 1.5rem;">Train</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Column -->
+        <div class="dashboard-col right-col">
+            <section id="resultSection" class="glass-panel result-section hidden" style="margin-top: 0;">
+                <div class="result-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0;">Analysis Result</h3>
+                    <button id="saveDbBtn" class="icon-btn" title="Download & Save to DB" style="color: var(--success); font-size: 1.2rem;">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                    </button>
+                </div>
+                
+                <div class="result-grid">
+                    <div class="result-item">
+                        <span class="label">Status:</span>
+                        <span id="detectedStatus" class="value badge"></span>
+                    </div>
+                </div>
+
+                <div class="text-comparison">
+                    <div class="text-box original-box">
+                        <h4>Original Input</h4>
+                        <p id="originalText"></p>
+                    </div>
+                    <div id="correctedBox" class="text-box corrected-box hidden" style="margin-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <h4 style="margin: 0;">Optimized Text</h4>
+                            <button class="icon-btn play-audio-btn" data-target="correctedText" data-lang="en" style="color: var(--primary); font-size: 1.2rem; padding: 0.2rem;"><i class="fa-solid fa-circle-play"></i></button>
+                        </div>
+                        <p id="correctedText"></p>
+                    </div>
+                    <div id="translatedBox" class="text-box secondary-box hidden" style="margin-top: 1.5rem; border: 1px solid var(--secondary); background: rgba(0, 0, 0, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <h4 style="color: var(--secondary); margin: 0;">Translated Output</h4>
+                            <button class="icon-btn play-audio-btn" data-target="translatedText" data-dynamic-lang="true" style="color: var(--secondary); font-size: 1.2rem; padding: 0.2rem;"><i class="fa-solid fa-circle-play"></i></button>
+                        </div>
+                        <p id="translatedText"></p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- UI Modals -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-gear"></i> Advanced Settings</h3>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <span>Enable Experimental Grammar Overrides</span>
+                    <label class="switch">
+                      <input type="checkbox" checked>
+                      <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span>Auto-Play Speech Definitions</span>
+                    <label class="switch">
+                      <input type="checkbox">
+                      <span class="slider"></span>
+                    </label>
+                </div>
+                <button id="clearMemoryBtn" class="action-btn" style="width: 100%; background: var(--danger); margin-top: 1rem;"><i class="fa-solid fa-dumpster"></i> Wipe ML Memory Cache</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Modal -->
+    <div id="databaseModal" class="modal hidden">
+        <div class="modal-content glass-panel" style="max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-database"></i> Saved Results Database</h3>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="databaseBody" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Records will be injected here -->
+                <p style="color: var(--text-muted); text-align: center;">Loading database...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div id="chatbot-container" class="chatbot-container">
+        <button id="chatbot-toggle" class="chatbot-toggle">
+            <i class="fa-solid fa-robot"></i>
+        </button>
+        <div id="chatbot-window" class="chatbot-window hidden">
+            <div class="chatbot-header">
+                <h4><i class="fa-solid fa-graduation-cap"></i> Project Assistant</h4>
+                <button id="chatbot-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="chatbot-body" class="chatbot-body">
+                <div class="chat-msg bot-msg">Hello! I am your interactive technical assistant. What would you like to know about this Gibberish Optimization project?</div>
+            </div>
+            <div class="chatbot-footer">
+                <input type="text" id="chatbot-input" placeholder="Type a question...">
+                <button id="chatbot-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
