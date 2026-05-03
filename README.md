@@ -1,5 +1,4 @@
-📘 Smart Gibberish Text Optimization System
-🚀 Overview
+📘 Smart Gibberish Text Optimization System Overview
 
 Smart Gibberish Text Optimization System is an AI-powered web application that detects, corrects, and optimizes noisy or gibberish text. It supports multilingual input, voice processing, document uploads, and real-time AI-assisted corrections with database-backed learning.
 
