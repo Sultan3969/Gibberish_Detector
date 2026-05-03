@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Started - Optimizer Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            /* Override index padding */
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .get-started-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .info-panel {
+            position: absolute;
+            left: 8%;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+            max-width: 600px;
+            pointer-events: none;
+        }
+
+        .info-panel * {
+            pointer-events: auto;
+        }
+
+        .figure-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 5;
+        }
+
+        .logout-btn {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 2rem;
+            z-index: 30;
+            cursor: pointer;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 0.8rem 1.8rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15);
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slideRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .hero-desc {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 3rem;
+            max-width: 90%;
+            animation: slideRight 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .start-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, var(--primary), #4facfe);
+            color: white;
+            padding: 1rem 2.2rem;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 10px 30px var(--primary-glow);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: fit-content;
+            animation: slideRight 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px var(--primary-glow);
+        }
+
+        @keyframes slideRight {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 80% center, rgba(0, 242, 254, 0.08), transparent 60%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob shape-1"></div>
+        <div class="blob shape-2"></div>
+    </div>
+
+    <div class="get-started-container">
+        <!-- Left Middle: Info & Button -->
+        <div class="info-panel">
+            <h1 class="hero-title">Welcome to<br>Optimizer Pro</h1>
+            <p class="hero-desc">
+                Your AI-powered assistant to instantly fix typos, correct gibberish, and translate text flawlessly.
+            </p>
+            <a href="{{ url_for('index') }}" class="start-btn">
+                Get Started <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <!-- Right Middle: 3D Interactive Figure -->
+        <div class="figure-panel">
+            <div id="canvas-container"></div>
+        </div>
+
+        <!-- Bottom Left: Logout -->
+        <a href="{{ url_for('logout') }}" class="logout-btn">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+    </div>
+
+    <!-- Bottom Right: Chatbot Widget -->
+    <div id="chatbot-container" class="chatbot-container">
+        <button id="chatbot-toggle" class="chatbot-toggle">
+            <i class="fa-solid fa-robot"></i>
+        </button>
+        <div id="chatbot-window" class="chatbot-window hidden">
+            <div class="chatbot-header">
+                <h4><i class="fa-solid fa-graduation-cap"></i> AI Assistant</h4>
+                <button id="chatbot-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="chatbot-body" class="chatbot-body">
+                <div class="chat-msg bot-msg">Hello! I am your interactive AI assistant. Feel free to ask me anything
+                    about how the Gibberish Optimizer works!</div>
+            </div>
+            <div class="chatbot-footer">
+                <input type="text" id="chatbot-input" placeholder="Type a question...">
+                <button id="chatbot-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // ----------------------------------------------------
+        // 3D Interactive Figure using Three.js
+        // ----------------------------------------------------
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        // Create a cool icosahedron wireframe
+        const geometry = new THREE.IcosahedronGeometry(2.8, 1);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x00f2fe,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.6
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+
+        // Add a solid inner core
+        const coreGeo = new THREE.IcosahedronGeometry(1.4, 0);
+        const coreMat = new THREE.MeshPhongMaterial({
+            color: 0xfe0979,
+            shininess: 100,
+            flatShading: true
+        });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffffff, 1.2);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+        const pointLight2 = new THREE.PointLight(0x00f2fe, 1);
+        pointLight2.position.set(-5, -5, -5);
+        scene.add(pointLight2);
+
+        scene.add(sphere);
+        scene.add(core);
+
+        // Shift objects to the right to balance with the left-aligned text
+        sphere.position.x = 4.0;
+        core.position.x = 4.0;
+
+        camera.position.z = 8;
+
+        // Interaction
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            mouseX = (e.clientX - rect.left - rect.width / 2) * 0.005;
+            mouseY = (e.clientY - rect.top - rect.height / 2) * 0.005;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            targetX = mouseX * 0.5;
+            targetY = mouseY * 0.5;
+
+            // Smooth rotation tracking mouse
+            sphere.rotation.y += 0.002 + (targetX - sphere.rotation.y) * 0.05;
+            sphere.rotation.x += 0.002 + (targetY - sphere.rotation.x) * 0.05;
+
+            // Core spins in opposite direction
+            core.rotation.y -= 0.01;
+            core.rotation.x -= 0.01;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // ----------------------------------------------------
+        // Chatbot logic for Get Started page
+        // ----------------------------------------------------
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotWindow = document.getElementById('chatbot-window');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotSend = document.getElementById('chatbot-send');
+        const chatbotBody = document.getElementById('chatbot-body');
+
+        chatbotToggle.addEventListener('click', () => {
+            chatbotWindow.classList.toggle('hidden');
+            if (!chatbotWindow.classList.contains('hidden')) chatbotInput.focus();
+        });
+
+        chatbotClose.addEventListener('click', () => {
+            chatbotWindow.classList.add('hidden');
+        });
+
+        async function sendChatMessage() {
+            const msg = chatbotInput.value.trim();
+            if (!msg) return;
+
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-msg user-msg';
+            userDiv.textContent = msg;
+            chatbotBody.appendChild(userDiv);
+            chatbotInput.value = '';
+            chatbotBody.scrollTop = chatbotBody.scrollHeight;
+
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-msg bot-msg';
+            typingDiv.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Thinking...';
+            chatbotBody.appendChild(typingDiv);
+            chatbotBody.scrollTop = chatbotBody.scrollHeight;
+
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: msg })
+                });
+                const data = await res.json();
+                chatbotBody.removeChild(typingDiv);
+
+                const botDiv = document.createElement('div');
+                botDiv.className = 'chat-msg bot-msg';
+                botDiv.textContent = data.response;
+                chatbotBody.appendChild(botDiv);
+            } catch (e) {
+                chatbotBody.removeChild(typingDiv);
+                const botDiv = document.createElement('div');
+                botDiv.className = 'chat-msg bot-msg';
+                botDiv.style.color = 'var(--danger)';
+                botDiv.textContent = "Connection error.";
+                chatbotBody.appendChild(botDiv);
+            }
+            chatbotBody.scrollTop = chatbotBody.scrollHeight;
+        }
+
+        chatbotSend.addEventListener('click', sendChatMessage);
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+    </script>
+</body>
+
+</html>
