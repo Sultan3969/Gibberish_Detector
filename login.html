@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Text Optimizer Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="login-body">
+    <div class="background-blobs">
+        <div class="blob shape-1"></div>
+        <div class="blob shape-2"></div>
+    </div>
+
+    <div style="text-align: center; max-width: 700px; width: 100%; padding: 2rem; z-index: 10; position: relative; animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        <i class="fa-solid fa-shield-halved" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 1.5rem; filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.4));"></i>
+        <h2 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 0.5rem; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Text Optimizer Pro</h2>
+        <p style="color: var(--text-muted); font-size: 1.2rem; margin-bottom: 3rem; letter-spacing: 2px; text-transform: uppercase;">Secure Access Portal</p>
+        
+        <div id="emailSection">
+            <p style="color: rgba(255, 255, 255, 0.85); font-size: 1.1rem; line-height: 1.8; text-align: center; margin-bottom: 2.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                Click below to generate a secure One-Time Password. The code will bypass email servers and be securely printed directly to your Python backend terminal.
+            </p>
+            <button id="requestBtn" class="action-btn">Generate Terminal Access Code</button>
+            <span id="emailMsg" class="error-msg"></span>
+        </div>
+
+        <div id="otpSection" class="hidden">
+            <div class="form-group" style="position: relative; margin-top: 1rem; margin-bottom: 1.5rem;">
+                <i class="fa-solid fa-lock" style="position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1rem;"></i>
+                <input type="text" id="otpInput" class="form-input" placeholder="• • • • • •" autocomplete="off" maxlength="6" style="padding-left: 3rem; text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem; font-weight: 700;">
+            </div>
+            <span id="otpMsg" class="error-msg" style="margin-bottom: 1rem;"></span>
+            <button id="verifyBtn" class="action-btn"><i class="fa-solid fa-shield-halved"></i> Verify & Login</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('requestBtn').addEventListener('click', async () => {
+            const msgBox = document.getElementById('emailMsg');
+            const btn = document.getElementById('requestBtn');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch('/send_otp', { method: 'POST' });
+                const data = await res.json();
+                
+                if(data.status === 'success') {
+                    document.getElementById('emailSection').classList.add('hidden');
+                    document.getElementById('otpSection').classList.remove('hidden');
+                    document.getElementById('otpMsg').className = 'success-msg';
+                    document.getElementById('otpMsg').textContent = "Check your Python terminal for the generated 6-digit access code!";
+                } else {
+                    msgBox.className = 'error-msg';
+                    msgBox.textContent = data.message || "Failed to generate code.";
+                    btn.disabled = false;
+                    btn.innerHTML = 'Generate Terminal Access Code';
+                }
+            } catch(e) {
+                msgBox.textContent = "Connection error.";
+                btn.disabled = false;
+                btn.innerHTML = 'Generate Terminal Access Code';
+            }
+        });
+
+        document.getElementById('verifyBtn').addEventListener('click', async () => {
+            const code = document.getElementById('otpInput').value.trim();
+            const msgBox = document.getElementById('otpMsg');
+            msgBox.className = 'error-msg';
+            if(!code) { msgBox.textContent = "Code is required."; return; }
+            
+            const btn = document.getElementById('verifyBtn');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch('/verify_otp', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({code: code})
+                });
+                const data = await res.json();
+                
+                if(data.status === 'success') {
+                    msgBox.className = 'success-msg';
+                    msgBox.textContent = "Authenticated! Redirecting...";
+                    window.location.href = data.redirect;
+                } else {
+                    msgBox.textContent = data.message || "Invalid code.";
+                    btn.disabled = false;
+                    btn.innerHTML = 'Verify and Login';
+                }
+            } catch(e) {
+                msgBox.textContent = "Connection error.";
+                btn.disabled = false;
+                btn.innerHTML = 'Verify and Login';
+            }
+        });
+    </script>
+</body>
+</html>
